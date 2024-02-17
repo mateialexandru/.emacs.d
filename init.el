@@ -407,8 +407,15 @@
 ;;  org-agenda-current-time-string
 ;;  "◀── now ─────────────────────────────────────────────────")
 
-(load-theme 'deeper-blue)
 
+
+;; Fix for ARM64 Git so that it uses the same configuration as gh cli tool
 (when (eq system-type 'windows-nt)
   (setq magit-git-executable "C:\\Program Files (x86)\\Git\\cmd\\git.exe")
   )
+
+;; Before: (load-theme 'deeper-blue)
+(use-package leuven-theme
+  :straight t
+  :config
+  (load-theme 'leuven-dark t))
