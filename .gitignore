@@ -3,3 +3,5 @@
 /server/
 /savehist
 /auto-save-list/
+/eln-cache/
+/elpa/
