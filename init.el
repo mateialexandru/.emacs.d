@@ -18,6 +18,19 @@
 
 (straight-use-package 'use-package)
 
+;; fixes for org-roam
+;; (straight-use-package '(org :local-repo nil)) 
+;; https://emacs.stackexchange.com/questions/73426/using-org-roam-capture-throws-error-symbols-function-definition-is-void-org-f
+;; (use-package org :straight (:type built-in))
+
+(let ((straight-current-profile 'pinned))
+  (straight-use-package 'org)
+  (straight-use-package 'org-contrib)
+  ;; Pin org-mode version.
+  (add-to-list 'straight-x-pinned-packages
+               '("org" . "924308a150ab82014b69c46c04d1ab71e874a2e6")))
+
+
 ;; Define the init file
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
@@ -47,13 +60,39 @@
   (inhibit-startup-message t)
   (set-fringe-mode 10)
   (pending-delete-mode 1)
+  (recentf-mode 1)
+  (recentf-max-saved-items 100)
   (global-auto-revert-mode 1)
   (global-hl-line-mode 1)
   (enable-recursive-minibuffers t)
-  (visible-bell 1))
+  (visible-bell 1)
+  (create-lockfiles nil)
+  (save-interprogram-paste-before-kill t)
+  (yank-pop-change-selection t)
+  (backup-directory-alist `(("." . ,(concat user-emacs-directory "backups"))))
+  (auto-save-file-name-transforms `((".*" ,(concat user-emacs-directory "backups") t)))
+  (delete-old-versions t)
+  (read-process-output-max (* 1024 1024))
+  (gc-cons-threshold 100000000)
+  (global-goto-address-mode 1)
+  )
+
+(add-hook 'dired-mode-hook 'auto-revert-mode)
 
 ;;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+(global-set-key [remap dabbrev-expand] 'hippie-expand)
+
+(setq-default prettify-symbols-alist
+              '(
+                ("#+begin_src"     . "λ")
+                ("#+BEGIN_SRC"     . "λ")
+                ("#+end_src"       . "λ")
+                ("#+END_SRC"       . "λ")))
+
+(setq global-prettify-symbols-mode t)
+
 
 (use-package which-key
   :straight t
@@ -384,6 +423,9 @@
 
 (global-org-modern-mode)
 
+(setq org-log-into-drawer t)
+(setq org-hide-emphasis-markers t)
+
 ;; (setq
 ;;  ;; Edit settings
 ;;  org-auto-align-tags nil
@@ -412,6 +454,16 @@
 ;; Fix for ARM64 Git so that it uses the same configuration as gh cli tool
 (when (eq system-type 'windows-nt)
   (setq magit-git-executable "C:\\Program Files (x86)\\Git\\cmd\\git.exe")
+  ;; Open files in dired mode using 'explorer'
+  ;; https://jblevins.org/log/dired-open
+  (eval-after-load "dired"
+    '(progn
+       (define-key dired-mode-map (kbd "z")
+                   (lambda () (interactive)
+                     (let ((fn (dired-get-file-for-visit)))
+                       (w32-shell-execute "open" fn))))))
+  ;; this can be done also with advice logic
+  ;; see later responses in https://stackoverflow.com/questions/2284319/opening-files-with-default-windows-application-from-within-emacs
   )
 
 ;; Before: (load-theme 'deeper-blue)
@@ -419,3 +471,170 @@
   :straight t
   :config
   (load-theme 'leuven-dark t))
+
+(use-package expand-region
+  :straight t
+  :bind (("C-=" . er/expand-region)
+         ("C-+" . er/contract-region)))
+
+(use-package restclient :straight t)
+(use-package restclient-jq :straight t)
+(use-package counsel-jq :straight t)
+(add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode) t)
+
+(use-package org-cliplink :straight t)
+(global-set-key (kbd "C-M-y") 'org-cliplink)
+
+;; https://jblevins.org/log/rainbow-mode
+(use-package rainbow-mode :straight t)
+(use-package rainbow-delimiters :straight t)
+
+;;https://github.com/ruediger/qrencode-el
+(use-package qrencode :straight t)
+
+;; https://pragmaticemacs.wordpress.com/2016/08/17/read-your-rss-feeds-in-emacs-with-elfeed/
+;; https://pragmaticemacs.wordpress.com/2016/08/24/a-tweak-to-elfeed-filtering/
+(use-package elfeed :straight t)
+
+
+;; https://pragmaticemacs.wordpress.com/
+(use-package dired-subtree
+  :straight t
+  :config
+  (bind-keys :map dired-mode-map
+             ("i" . dired-subtree-insert)
+             (";" . dired-subtree-remove)))
+
+;; narrow dired to match filter
+;; https://pragmaticemacs.wordpress.com/2016/03/01/dynamically-filter-directory-listing-with-dired-narrow/
+(use-package dired-narrow
+  :straight t
+  :defer t
+  :bind (:map dired-mode-map
+              ("/" . dired-narrow)))
+
+(use-package nerd-icons-dired :straight t)
+
+(add-hook 'dired-mode-hook #'nerd-icons-dired-mode)
+
+;; persistent-scratch
+;; https://pragmaticemacs.wordpress.com/2016/11/10/a-persistent-scratch-buffer/
+(use-package persistent-scratch
+  :straight t
+  :config
+  (persistent-scratch-setup-default))
+
+;; volatile highlights - temporarily highlight changes from pasting etc
+;; https://pragmaticemacs.wordpress.com/2016/05/05/volatile-highlights/
+;; https://github.com/k-talo/volatile-highlights.el
+(use-package volatile-highlights
+  :straight t
+  :config
+  (volatile-highlights-mode t))
+
+
+
+;; https://pragmaticemacs.wordpress.com/2016/04/08/super-efficient-movement-using-avy/
+(use-package avy
+  :straight t
+  :defer t
+  :bind (("C-`" . avy-goto-char)))
+
+
+;; wrap-region
+;; https://pragmaticemacs.wordpress.com/2015/10/12/wrap-text-in-custom-characters/
+(use-package wrap-region
+  :straight t
+  :config
+  (wrap-region-add-wrappers
+   '(("*" "*" nil org-mode)
+     ("~" "~" nil org-mode)
+     ("/" "/" nil org-mode)
+     ("=" "=" "+" org-mode)
+     ("_" "_" nil org-mode)
+     ("$" "$" nil (org-mode latex-mode))))
+  (add-hook 'org-mode-hook 'wrap-region-mode)
+  (add-hook 'latex-mode-hook 'wrap-region-mode))
+
+
+(use-package re-builder
+  :straight t
+  ;; :bind (("C-c C-r" . re-builder))
+  :config (setq reb-re-syntax 'string))
+
+
+;; https://github.com/wilfred/helpful
+(use-package helpful :straight t)
+(global-set-key (kbd "C-h f") #'helpful-callable)
+(global-set-key (kbd "C-h v") #'helpful-variable)
+(global-set-key (kbd "C-h k") #'helpful-key)
+
+(use-package elisp-demos :straight t)
+(advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update)
+
+(use-package dashboard :straight t)
+(setq dashboard-startup-banner 'logo)
+(setq dashboard-center-content nil)
+(dashboard-setup-startup-hook)
+
+
+(use-package projectile :straight t
+  :config
+  (projectile-mode +1))
+
+
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+(use-package nerd-icons-completion
+  :straight t
+  :after marginalia
+  :config
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
+
+;; (use-package sqlite-mode-extras
+;;   :straight t
+;;   :bind (:map
+;;          sqlite-mode-map
+;;          ("n" . next-line)
+;;          ("p" . previous-line)
+;;          ("b" . sqlite-mode-extras-backtab-dwim)
+;;          ("f" . sqlite-mode-extras-tab-dwim)
+;;          ("+" . sqlite-mode-extras-add-row)
+;;          ("D" . sqlite-mode-extras-delete-row-dwim)
+;;          ("C" . sqlite-mode-extras-compose-and-execute)
+;;          ("E" . sqlite-mode-extras-execute)
+;;          ("S" . sqlite-mode-extras-execute-and-display-select-query)
+;;          ("DEL" . sqlite-mode-extras-delete-row-dwim)
+;;          ("g" . sqlite-mode-extras-refresh)
+;;          ("<backtab>" . sqlite-mode-extras-backtab-dwim)
+;;          ("<tab>" . sqlite-mode-extras-tab-dwim)
+;;          ("RET" . sqlite-mode-extras-ret-dwim)))
+
+
+(use-package org-roam
+  :straight t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/mindmap/roam")
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point)
+         :map org-roam-dailies-map
+         ("Y" . org-roam-dailies-capture-yesterday)
+         ("T" . org-roam-dailies-capture-tomorrow))
+  :bind-keymap
+  ("C-c n d" . org-roam-dailies-map)
+  :config
+  (require 'org-roam-dailies) ;; Ensure the keymap is available
+  (org-roam-db-autosync-mode))
