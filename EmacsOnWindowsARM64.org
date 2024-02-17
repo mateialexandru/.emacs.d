@@ -123,9 +123,9 @@
 ** Projectile
    [[https://docs.projectile.mx/projectile/][Learn more about Projectile]]
 
-
    
 * Tooling
   - Git for Windows
   - GH CLI -> this was needed in order to reliably get Github clone to work on my Surface Pro X
+    - run =gh auth setup-git= to enable GH auth for git commands
   - install [[https://dejavu-fonts.github.io/][DejaVu Fonts]]
