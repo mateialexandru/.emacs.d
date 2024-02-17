@@ -1,0 +1,131 @@
+#+TITLE: Setting up Emacs for the first time on Windows (ARM64)
+
+* Start here
+
+** Setup %HOME%/.emacs.d/init.el
+  1. Install Emacs from GNU mirror (for ARM64 devices, if you have an
+     older version of Windows, you might need to use the i686 MSI
+     version)
+  2. From the command line, setup your preferred location for
+     environment variable %HOME%; this will be many times referenced
+     in Emacs via `~` in paths like `~/.emacs.d/init.el`, etc.
+     1. you can do this in cmd line via `setx HOME {YOUR HOME DIRECTORY}`
+  3. Once this is done, restart Emacs, and then create your init.el
+     configuration file:
+     1. in Emacs, use C-x C-f and then type `~/.emacs.d/init.el` RET RET
+	This should create a new file
+
+** Setup basic Emacs customization via the menu-bar
+   1. In the top menu, you will find a menu called Options. Take a
+      look at what is avaialble
+   2. Here are some interesting customizations to consider:
+      - Highlight matching parentheses (super useful to track multiple
+        nested parens - LISP has that)
+      - Use CUA keys: use same Windows commands for Copy, Paste, etc.
+      - Blink cursor (disable)
+      - Show/Hide:
+	- Tool-bar (disabled)
+	- Tool-tips (disabled)
+	- Scroll-bar -> No vertical scroll-bar
+	- Battery-mode
+   3. Save the configuration via Options -> Save Options
+   4. Restart Emacs (C-x c to close Emacs)
+   5. Check that the configuration has been preserved
+   6. Set default font: I used Segoe UI (popular on Windows)
+   7. Let's setup a nice theme
+      - Options -> Customize Emacs -> Custom Themes
+      - click through the themes and find something that you like
+      - once you found a good theme, click on `Save Theme Changes`
+   8. Onced you saved your changes, open `~/.emacs.d/init.el` and
+      notice the changes that were added by Emacs customization
+
+** Setup recentf-mode via init.el (.emacs in my case)
+   1. To make it easier to jump to frequently used files we should
+      enable recentf-mode
+      1. Go to your init.el file and add the following (recentf-mode
+         t)
+      2. This will remember what files you recently used and give you
+         and option to load them via M-x `recentf-open-files`
+
+** Setup dedicated customization file `emacs-custom.el`
+   [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Saving-Customizations.html][Learn more about Emacs customization]]
+   1. Add the following lines to your .init.el (.emacs in my case)
+      ```
+        (setq custom-file "~/.config/emacs-custom.el")
+        (load custom-file)
+      ```
+   2. Move `custom-set-variables` and `custom-set-faces` to the newly
+      created emacs-custom.el
+   3. Restart Emacs
+      - you should see no difference, and moving forward all UI
+        customizations will be saved in `emacs-custom.el` keeping your
+        init.el configuration clean and tidy
+	
+** Setup MELPA
+   [[https://www.emacswiki.org/emacs/MELPA][Learn more about MELPA]]
+   1. Add this to your `init.el`:
+      ```
+      (require 'package)
+      (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+      ```
+   2. Save and restart emacs
+   3. Go to Options -> Manage Emacs Packages
+   4. If prompted, select `always accept (a)`
+   5. Notice there is a Package menu option
+   6. Select Package -> Refresh Package list (r)
+      This will ask yor for certificates, select `always option (a)`
+   7. Type the following and accept all certificates when prompted
+      `M-x package-install RET dashboard`
+         
+** Setup Emacs dashboard
+   [[https://github.com/emacs-dashboard/emacs-dashboard][Learn more about Emacs dashboard (GitHub)]]
+   1. Go to Options -> Manage Emacs Packages
+   2. Make sure you have refreshed the list of packages via Package ->
+      Refresh Package List (r)
+   3. Search for `dashboard` package and click on it to install it
+   4. Add this to your `init.el` file
+      ```
+      (require 'dashboard)
+      (dashboard-setup-startup-hook)
+      ```
+   5. Restart Emacs
+
+*** Advanced: all-the-icons
+- [[https://github.com/domtronn/all-the-icons.el][Learn more about all-the-icons ]]
+- Dashboard has nice integration with `all-the-icons` package where it
+  displays icons for file names and for the main dashboard icons.
+- Here are the steps to install it:
+  1. M-x package-install RET all-the-icons RET
+  2. Add `( require 'all-the-icons)` to your `.init.el`
+  3. M-x all-the-icons-install-fonts RET
+     1. select the location where you want to download the fonts
+        required for this package and download them (follow instructions)
+     2. In Windows Explorer, navigate to the downloaded fonts folder
+        and opean each `.tff` file individually
+	- click on install, and repeat the process for each one of them
+- Once installed, you would want to enable support in dashboard for
+  the new package.
+  - Add the following:
+  ```
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  ``'
+  - Restart Emacs
+    
+**** All-the-icons-XXX
+     You can add other packages for showing icons in different kind of
+     buffers, for example I added one for dired functionality:
+     `all-the-icons-dired`.
+
+*** Further dashboard customization
+    - add support for custom navigation buttons via `dashboard-navigator-buttons`
+
+** Projectile
+   [[https://docs.projectile.mx/projectile/][Learn more about Projectile]]
+
+
+   
+* Tooling
+  - Git for Windows
+  - GH CLI -> this was needed in order to reliably get Github clone to work on my Surface Pro X
+  - install [[https://dejavu-fonts.github.io/][DejaVu Fonts]]

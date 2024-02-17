@@ -42,8 +42,8 @@
   (setq tab-width 2)
   :custom
   (tool-bar-mode nil)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
+  (menu-bar-mode nil)
+  (scroll-bar-mode nil)
   (inhibit-startup-message t)
   (set-fringe-mode 10)
   (pending-delete-mode 1)
@@ -63,13 +63,13 @@
   (which-key-mode)
   (setq which-key-idle-delay 0.2))
 
-(use-package doom-modeline
-  :straight t
-  :init (doom-modeline-mode 1)
-  :custom (
-	         (doom-modeline-minor-modes t)
-	   )
-  )
+;; (use-package doom-modeline
+;;   :straight t
+;;   :init (doom-modeline-mode 1)
+;;   :custom (
+;; 	         (doom-modeline-minor-modes t)
+;; 	   )
+;;   )
 
 (size-indication-mode 1)
 (setq doom-modeline-vcs-max-length 30)
@@ -378,7 +378,6 @@
  ("JST-9" "Tokyo")))
 
 
-
 (use-package org-modern :straight t)
 
 (setq org-modern-star '("λ" "◉" "○" "◈" "◇" "✳"))
@@ -407,3 +406,5 @@
 ;;    " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
 ;;  org-agenda-current-time-string
 ;;  "◀── now ─────────────────────────────────────────────────")
+
+(load-theme 'deeper-blue)
