@@ -408,3 +408,7 @@
 ;;  "◀── now ─────────────────────────────────────────────────")
 
 (load-theme 'deeper-blue)
+
+(when (eq system-type 'windows-nt)
+  (setq magit-git-executable "C:\\Program Files (x86)\\Git\\cmd\\git.exe")
+  )
