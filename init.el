@@ -471,6 +471,7 @@
 
 (use-package restclient :straight t)
 (use-package restclient-jq :straight t)
+(use-package ob-restclient :straight t)
 (use-package counsel-jq :straight t)
 (add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode) t)
 
@@ -633,7 +634,8 @@
 
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((plantuml . t)))
+ '((plantuml . t)
+   (restclient . t)))
 
 (setq org-plantuml-jar-path "~/.emacs.d/tools/plantuml-1.2024.3.jar")
 (setq plantuml-default-exec-mode 'jar)
