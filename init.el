@@ -23,6 +23,7 @@
 ;; https://emacs.stackexchange.com/questions/73426/using-org-roam-capture-throws-error-symbols-function-definition-is-void-org-f
 ;; (use-package org :straight (:type built-in))
 
+;; https://github.com/radian-software/straight.el#how-can-i-use-the-built-in-version-of-a-package
 (let ((straight-current-profile 'pinned))
   (straight-use-package 'org)
   (straight-use-package 'org-contrib)
