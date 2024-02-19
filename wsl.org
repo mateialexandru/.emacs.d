@@ -1,0 +1,8 @@
+* Install Az CLI [[https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt][Install the Azure CLI on Linux | Microsoft Learn]]
+
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+* Install WSLU [[https://wslutiliti.es/wslu/][wslu | wslu Wiki]]
+Required for interacting nicely with Windows from WSL
+
+sudo apt install wslu
