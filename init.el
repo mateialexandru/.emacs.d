@@ -62,6 +62,7 @@
   (set-fringe-mode 10)
   (pending-delete-mode 1)
   (recentf-mode 1)
+  (winner-mode 1)
   (recentf-max-saved-items 100)
   (global-auto-revert-mode 1)
   (global-hl-line-mode 1)
@@ -668,4 +669,10 @@
   )
 
 ;; uses json-snatcher underneath C-c C-p
-(use-package json-mode :straight t)
+
+
+(load (expand-file-name "x.el" user-emacs-directory))
+
+(use-package json-mode :straight t
+  :bind
+  (("C-c C-c" . x/visualize-json)))
