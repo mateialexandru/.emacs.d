@@ -75,6 +75,7 @@
   (delete-old-versions t)
   (read-process-output-max (* 1024 1024))
   (gc-cons-threshold 100000000)
+  (show-paren-mode 1)
   (global-goto-address-mode 1)
   )
 
@@ -324,8 +325,8 @@
 ;;;; 3. locate-dominating-file
   ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
 ;;;; 4. projectile.el (projectile-project-root)
-  ;; (autoload 'projectile-project-root "projectile")
-  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-function (lambda (_) (projectile-project-root)))
 ;;;; 5. No project support
   ;; (setq consult-project-function nil)
   )
@@ -396,15 +397,6 @@
 
 (when (member "DejaVu Sans Mono" (font-family-list))
   (set-frame-font "DejaVu Sans Mono-15" t t))
-
-(use-package json-snatcher :straight t)
-(defun js-mode-bindings ()
-  "Sets a hotkey for using the json-snatcher plugin"
-	(when (string-match  "\\.json$" (buffer-name))
-    (local-set-key (kbd "C-c C-s") 'jsons-print-path)))
-(add-hook 'js-mode-hook 'js-mode-bindings)
-(add-hook 'djs2-mode-hook 'js-mode-bindings)
-
 
 (setq display-time-world-list t)
 
@@ -480,6 +472,7 @@
 
 (use-package restclient :straight t)
 (use-package restclient-jq :straight t)
+(use-package ob-restclient :straight t)
 (use-package counsel-jq :straight t)
 (add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode) t)
 
@@ -639,3 +632,38 @@
   :config
   (require 'org-roam-dailies) ;; Ensure the keymap is available
   (org-roam-db-autosync-mode))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((plantuml . t)
+   (restclient . t)))
+
+(setq org-plantuml-jar-path "~/.emacs.d/tools/plantuml-1.2024.3.jar")
+(setq plantuml-default-exec-mode 'jar)
+
+(setq org-display-inline-images t)
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+(setq org-startup-with-inline-images "inlineimages")
+
+(use-package markdown-mode :straight t)
+
+(use-package shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("shell-maker.el")))
+
+(use-package chatgpt-shell
+  :requires shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell.el"))
+  :custom
+  (chatgpt-shell-openai-key
+   (auth-source-pick-first-password :host "api.openai.com"))
+  :bind (("C-c C-e" . chatgpt-shell-prompt-compose)
+         :map org-mode-map
+         ("C-c C-e" . chatgpt-shell-prompt-compose)
+         :map eshell-mode-map
+         ("C-c C-e" . chatgpt-shell-prompt-compose)
+         :map emacs-lisp-mode-map
+         ("C-c C-e" . chatgpt-shell-prompt-compose))
+  )
+
+;; uses json-snatcher underneath C-c C-p
+(use-package json-mode :straight t)
