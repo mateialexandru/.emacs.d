@@ -74,6 +74,7 @@
   (delete-old-versions t)
   (read-process-output-max (* 1024 1024))
   (gc-cons-threshold 100000000)
+  (show-paren-mode 1)
   (global-goto-address-mode 1)
   )
 
@@ -395,15 +396,6 @@
 
 (when (member "DejaVu Sans Mono" (font-family-list))
   (set-frame-font "DejaVu Sans Mono-15" t t))
-
-(use-package json-snatcher :straight t)
-(defun js-mode-bindings ()
-  "Sets a hotkey for using the json-snatcher plugin"
-	(when (string-match  "\\.json$" (buffer-name))
-    (local-set-key (kbd "C-c C-s") 'jsons-print-path)))
-(add-hook 'js-mode-hook 'js-mode-bindings)
-(add-hook 'djs2-mode-hook 'js-mode-bindings)
-
 
 (setq display-time-world-list t)
 
