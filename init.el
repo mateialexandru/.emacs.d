@@ -396,7 +396,7 @@
 ;; (face-attribute 'default :font)
 
 (when (member "DejaVu Sans Mono" (font-family-list))
-  (set-frame-font "DejaVu Sans Mono-15" t t))
+  (set-frame-font "DejaVu Sans Mono-18" t t))
 
 (setq display-time-world-list t)
 
@@ -633,12 +633,14 @@
   (require 'org-roam-dailies) ;; Ensure the keymap is available
   (org-roam-db-autosync-mode))
 
+(use-package plantuml-mode :straight t)
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((plantuml . t)
    (restclient . t)))
 
 (setq org-plantuml-jar-path "~/.emacs.d/tools/plantuml-1.2024.3.jar")
+(setq plantuml-jar-path "~/.emacs.d/tools/plantuml-1.2024.3.jar")
 (setq plantuml-default-exec-mode 'jar)
 
 (setq org-display-inline-images t)
