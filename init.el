@@ -639,4 +639,36 @@
   (require 'org-roam-dailies) ;; Ensure the keymap is available
   (org-roam-db-autosync-mode))
 
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((plantuml . t)))
+
+(setq org-plantuml-jar-path "~/.emacs.d/tools/plantuml-1.2024.3.jar")
+(setq plantuml-default-exec-mode 'jar)
+
+(setq org-display-inline-images t)
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+(setq org-startup-with-inline-images "inlineimages")
+
 (use-package markdown-mode :straight t)
+
+(use-package shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("shell-maker.el")))
+
+(use-package chatgpt-shell
+  :requires shell-maker
+  :straight (:host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell.el"))
+  :custom
+  (chatgpt-shell-openai-key
+   (auth-source-pick-first-password :host "api.openai.com"))
+  :bind (("C-c C-e" . chatgpt-shell-prompt-compose)
+         :map org-mode-map
+         ("C-c C-e" . chatgpt-shell-prompt-compose)
+         :map eshell-mode-map
+         ("C-c C-e" . chatgpt-shell-prompt-compose)
+         :map emacs-lisp-mode-map
+         ("C-c C-e" . chatgpt-shell-prompt-compose))
+  )
+
+;; uses json-snatcher underneath C-c C-p
+(use-package json-mode :straight t)
