@@ -101,7 +101,7 @@
   :diminish which-key-mode
   :config
   (which-key-mode)
-  (setq which-key-idle-delay 0.2))
+  (setq which-key-idle-delay 1))
 
 ;; (use-package doom-modeline
 ;;   :straight t
