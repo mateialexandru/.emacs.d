@@ -153,7 +153,7 @@
   (vertico-mode)
 
 					;  ;; Grow and shrink the Vertico minibuffer
-  (setq vertico-resize t)
+  (setq vertico-resize nil)
 
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
   (setq vertico-cycle t)
@@ -676,3 +676,9 @@
 (use-package json-mode :straight t
   :bind
   (("C-c C-c" . x/visualize-json)))
+
+
+(use-package vertico-posframe :straight t
+  :init
+  (vertico-posframe-mode)
+  )
