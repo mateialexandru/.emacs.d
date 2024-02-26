@@ -44,7 +44,7 @@
 (use-package emacs
   :init
   ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
+  (setq completion-cycle-threshold 2)
   ;; Enable indentation+completion using the TAB key.
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete)
@@ -208,7 +208,8 @@
   :straight t
   :custom
   (completion-styles '(flex orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (completion-category-overrides '((file (styles basic partial-completion))
+                                   (eglot (styles . (orderless flex))))))
 
 (use-package embark
   :straight t
@@ -375,6 +376,32 @@
   :init
   (global-corfu-mode))
 
+(defun corfu-enable-in-minibuffer ()
+  "Enable Corfu in the minibuffer."
+  (when (local-variable-p 'completion-at-point-functions)
+    ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+    (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                corfu-popupinfo-delay nil)
+    (corfu-mode 1)))
+(add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer)
+
+
+(use-package corfu-candidate-overlay
+    :straight (:type git
+               :repo "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
+               :files (:defaults "*.el"))
+    :after corfu
+    :config
+    ;; enable corfu-candidate-overlay mode globally
+    ;; this relies on having corfu-auto set to nil
+    (corfu-candidate-overlay-mode +1)
+    ;; bind Ctrl + TAB to trigger the completion popup of corfu
+    (global-set-key (kbd "C-<tab>") 'completion-at-point)
+    ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+    ;; (keybing <iso-lefttab> may not work for your keyboard model)
+    (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
+
+
 (use-package nerd-icons
   :straight t
   ;; :custom
@@ -383,6 +410,15 @@
   ;; but you can use any other Nerd Font if you want
   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
   )
+(use-package nerd-icons-corfu
+  :straight t
+  ;; :custom
+  ;; The Nerd Font you want to use in GUI
+  ;; "Symbols Nerd Font Mono" is the default and is recommended
+  ;; but you can use any other Nerd Font if you want
+  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  )
+(add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
 
 
 
@@ -700,4 +736,3 @@
   :init
   (vertico-posframe-mode)
   )
-
