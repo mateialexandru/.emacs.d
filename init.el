@@ -113,11 +113,17 @@
 	   )
   )
 
+;; Before: (load-theme 'deeper-blue)
+;; (use-package leuven-theme
+;;   :straight t
+;;   :config
+;;   (load-theme 'leuven-dark t))
+
 (use-package doom-themes
   :straight t
   :config
   ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+  (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-one t)
 
@@ -514,12 +520,6 @@
   ;; see later responses in https://stackoverflow.com/questions/2284319/opening-files-with-default-windows-application-from-within-emacs
   )
 
-;; Before: (load-theme 'deeper-blue)
-(use-package leuven-theme
-  :straight t
-  :config
-  (load-theme 'leuven-dark t))
-
 (use-package expand-region
   :straight t
   :bind (("C-=" . er/expand-region)
@@ -736,3 +736,16 @@
   :init
   (vertico-posframe-mode)
   )
+
+(use-package treesit-auto
+  :straight t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
+
+(use-package docker
+  :straight t
+  :bind ("C-c d" . docker))
