@@ -749,3 +749,6 @@
 (use-package docker
   :straight t
   :bind ("C-c d" . docker))
+
+;; https://github.com/emacs-pe/docker-tramp.el -> a small note added at the end
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
