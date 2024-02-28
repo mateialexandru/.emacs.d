@@ -126,7 +126,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
+  (load-theme 'doom-rouge t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -754,3 +754,12 @@
 (require 'tramp)
 ;; https://github.com/emacs-pe/docker-tramp.el -> a small note added at the end
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
+(use-package neotree :straight t
+  :bind ("C-c \\" . neotree-toggle)
+  :custom
+  (neo-smart-open t)
+  (neotree-window-width 40)
+  (projectile-switch-project-action 'neotree-projectile-action))
+
+(use-package all-the-icons :straight t)
