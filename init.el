@@ -109,7 +109,8 @@
   :straight t
   :init (doom-modeline-mode 1)
   :custom (
-	         (doom-modeline-minor-modes t)
+	   (doom-modeline-minor-modes t)
+           (doom-modeline-height 10 )
 	   )
   )
 
@@ -750,5 +751,6 @@
   :straight t
   :bind ("C-c d" . docker))
 
+(require 'tramp)
 ;; https://github.com/emacs-pe/docker-tramp.el -> a small note added at the end
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
