@@ -110,7 +110,7 @@
   :init (doom-modeline-mode 1)
   :custom (
 	   (doom-modeline-minor-modes t)
-           (doom-modeline-height 10 )
+           (doom-modeline-height 40 )
 	   )
   )
 
@@ -126,8 +126,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-rouge t)
-
+  
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
   ;; Enable custom neotree theme (all-the-icons must be installed!)
@@ -141,10 +140,35 @@
 (size-indication-mode 1)
 (setq doom-modeline-vcs-max-length 30)
 
+(use-package ample-theme :straight t)
+(use-package sublime-themes :straight t)
+
+;; Machine specific configuration
+(when (string= "Framework" (system-name))
+  (load-theme 'junio
+              ))
+;; 'ample-theme 
+;; 'doom-monokai-pro
+;; 'doom-ayu-mirage
+;; 'doom-Iosvkem
+;; 'doom-gruvbox
+;; 'doom-bluloco-darkp
+
+(when (string= "Framework" (system-name))
+  (when (member "DejaVu Sans Mono" (font-family-list))
+    (set-frame-font "DejaVu Sans Mono-22" t t))
+  )
+
+(when (string= "SProX" (system-name))
+  (load-theme 'doom-rouge t))
+
+
 (use-package all-the-icons
   :straight t)
 
-(use-package shell-pop :straight t)
+(use-package shell-pop :straight t
+  :custom
+  (shell-pop-window-size 100))
 
 (custom-set-variables
  '(shell-pop-universal-key "C-\\"))
@@ -458,7 +482,8 @@
 ;; (face-attribute 'default :font)
 
 (when (member "DejaVu Sans Mono" (font-family-list))
-  (set-frame-font "DejaVu Sans Mono-18" t t))
+  (set-frame-font "DejaVu Sans Mono-22" t t))
+
 
 (setq display-time-world-list t)
 
