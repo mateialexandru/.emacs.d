@@ -1,3 +1,7 @@
+;;; init.el --- My Emacs configuration
+;;; Commentary:
+;;; Code:
+;; This is the main configuration file for Emacs.
 (setq package-enable-at-startup nil)
 
 (defvar bootstrap-version)
@@ -19,7 +23,7 @@
 (straight-use-package 'use-package)
 
 ;; fixes for org-roam
-;; (straight-use-package '(org :local-repo nil)) 
+;; (straight-use-package '(org :local-repo nil))
 ;; https://emacs.stackexchange.com/questions/73426/using-org-roam-capture-throws-error-symbols-function-definition-is-void-org-f
 ;; (use-package org :straight (:type built-in))
 
@@ -38,8 +42,21 @@
   (load custom-file))
 
 
-(use-package lispy :straight t)
-(add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
+(use-package lispy :straight t
+  :hook
+  ((emacs-lisp-mode . lispy-mode)
+   (lisp-mode . lispy-mode)
+   (scheme-mode . lispy-mode)
+   (clojure-mode . lispy-mode)
+   (hy-mode . lispy-mode)
+   (racket-mode . lispy-mode)
+   (lfe-mode . lispy-mode)
+   (dune-mode . lispy-mode)
+   (fennel-mode . lispy-mode)
+   (sly-mrepl-mode . lispy-mode)
+   (sly-mode . lispy-mode)
+   (eval-expression-minibuffer-setup . lispy-mode)
+   (ielm-mode . lispy-mode)))
 
 (use-package delight :straight t)
 (use-package emacs
@@ -140,7 +157,6 @@
   (doom-themes-org-config))
 
 (size-indication-mode 1)
-(setq doom-modeline-vcs-max-length 30)
 
 (use-package ample-theme :straight t)
 (use-package sublime-themes :straight t)
@@ -149,7 +165,7 @@
 (when (string= "Framework" (system-name))
   (load-theme 'junio
               ))
-;; 'ample-theme 
+;; 'ample-theme
 ;; 'doom-monokai-pro
 ;; 'doom-ayu-mirage
 ;; 'doom-Iosvkem
@@ -185,11 +201,13 @@
   (("M-\\" . ace-window)))
 
 (use-package move-text
-  :straight t)
+  :straight t
+  :config
+  (move-text-default-bindings))
 
-(move-text-default-bindings)
 
 (defun indent-region-advice (&rest ignored)
+  "Indent the region after moving it up or down.  IGNORED is not used."
   (let ((deactivate deactivate-mark))
     (if (region-active-p)
 	(indent-region (region-beginning) (region-end))
@@ -250,7 +268,7 @@
   :straight t
   ;; Show the Embark target at point via Eldoc.  You may adjust the Eldoc
   ;; strategy, if you want to see the documentation from multiple providers.
-  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target) 
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
   ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
 
   :bind
@@ -452,8 +470,10 @@
   ;; "Symbols Nerd Font Mono" is the default and is recommended
   ;; but you can use any other Nerd Font if you want
   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  :custom
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
   )
-(add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+
 
 
 
@@ -483,28 +503,31 @@
   (setq emojify-emoji-styles '(unicode))
   (bind-key* (kbd "C-c .") #'emojify-insert-emoji))
 
-;; (face-attribute 'default :font)
+(use-package time
+  :config
+  (display-time-mode 1)
+  (setq world-clock-list
+        '(("UTC" "UTC")
+          ("PST8PDT" "Seattle")
+          ("EET-2EEST" "Bucharest")
+          ("EST5EDT" "New York")
+          ("GMT0BST" "London")
+          ("CET-1CDT" "Paris")
+          ("IST-5:30" "Bangalore")
+          ("JST-9" "Tokyo")))
+  )
 
-(setq display-time-world-list t)
+(use-package org-modern :straight t
+  :custom
+  (org-modern-star '("λ" "◉" "○" "◈" "◇" "✳"))
+  :config
+  (global-org-modern-mode)
+  )
 
-(setq legacy-style-world-list '(("UTC" "UTC")
-                                ("PST8PDT" "Seattle")
-                                ("EET-2EEST" "Bucharest")
-                                ("EST5EDT" "New York")
-                                ("GMT0BST" "London")
-                                ("CET-1CDT" "Paris")
-                                ("IST-5:30" "Bangalore")
-                                ("JST-9" "Tokyo")))
-
-
-(use-package org-modern :straight t)
-
-(setq org-modern-star '("λ" "◉" "○" "◈" "◇" "✳"))
-
-(global-org-modern-mode)
-
-(setq org-log-into-drawer t)
-(setq org-hide-emphasis-markers t)
+(use-package org
+  :custom
+  (org-log-into-drawer t)
+  (org-hide-emphasis-markers t))
 
 ;; (setq
 ;;  ;; Edit settings
@@ -647,15 +670,25 @@
 (use-package elisp-demos :straight t)
 (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update)
 
-(use-package dashboard :straight t)
-(setq dashboard-startup-banner 'logo)
-(setq dashboard-center-content nil)
-(dashboard-setup-startup-hook)
+(use-package dashboard :straight t
+  :config
+  (setq dashboard-items '((recents  . 5)
+                          (bookmarks . 5)
+                          (projects . 5)
+                          (agenda . 5)))
+  (dashboard-setup-startup-hook)
+  :custom
+  (dashboard-set-heading-icons t)
+  (dashboard-set-file-icons t)
+  (dashboard-startup-banner 'logo)
+  (dashboard-center-content nil)
+  )
 
 
 (use-package projectile :straight t
   :config
-  (projectile-mode +1))
+  (projectile-mode +1)
+  )
 
 
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
@@ -748,6 +781,7 @@
          ("C-c C-e" . chatgpt-shell-prompt-compose))
   )
 
+
 ;; uses json-snatcher underneath C-c C-p
 
 
@@ -822,8 +856,9 @@
                 (if dir (list 'vc 'Git  dir) nil)
                 )))
 
-(use-package apheleia :straight t)
-(apheleia-global-mode +1)
+(use-package apheleia :straight t
+  :config
+  (apheleia-global-mode +1))
 
 (use-package editorconfig :straight t)
 
@@ -831,9 +866,32 @@
 (use-package olivetti :straight t)
 (use-package focus :straight t)
 
+;; let 's rewrite copilot using straight and use-package and defining keybinds
 (use-package copilot
   :straight (:host github :repo "copilot-emacs/copilot.el" :files ("dist" "*.el"))
-  :ensure t)
-(define-key copilot-completion-map (kbd "<right>") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "<right>") 'copilot-accept-completion)
-(add-hook 'prog-mode-hook 'copilot-mode)
+  :ensure t
+  :bind
+  (:map copilot-completion-map
+        ("<right>" . copilot-accept-completion)
+        ("<down>" . copilot-next-completion)
+        ("<up>" . copilot-previous-completion)
+        )
+  :hook (prog-mode . copilot-mode))
+
+
+(use-package flycheck :straight t
+  :config
+  (global-flycheck-mode))
+
+(use-package flycheck-posframe :straight t
+  :config
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+
+(use-package nix-mode :straight t
+  :mode "\\.nix\\'")
+
+
+(provide 'init)
+;;; init.el ends here
+
+
