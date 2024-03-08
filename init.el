@@ -41,7 +41,9 @@
 (use-package lispy :straight t)
 (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
 
+(use-package delight :straight t)
 (use-package emacs
+  :delight (volatile-highlights-mode) (eldoc-mode) (which-key-mode) (projectile-mode)
   :init
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 2)
@@ -159,8 +161,10 @@
     (set-frame-font "DejaVu Sans Mono-22" t t))
   )
 
-(when (string= "SProX" (system-name))
-  (load-theme 'doom-rouge t))
+(when (string= "X-PROX" (system-name))
+  (when (member "DejaVu Sans Mono" (font-family-list))
+    (set-frame-font "DejaVu Sans Mono-14" t t))
+  (load-theme 'doom-ayu-dark t))
 
 
 (use-package all-the-icons
@@ -197,11 +201,11 @@
 
 
 (use-package vertico
-:straight t
+  :straight t
   :config
   (vertico-mode)
 
-					;  ;; Grow and shrink the Vertico minibuffer
+                                        ;  ;; Grow and shrink the Vertico minibuffer
   (setq vertico-resize nil)
 
   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
@@ -216,7 +220,7 @@
   (history-length 10000)
   (history-delete-duplicates t)
   (savehist-additional-variables
-        '(shell-command-history kill-ring search-ring regexp-search-ring compile-history log-edit-comment-ring))
+   '(shell-command-history kill-ring search-ring regexp-search-ring compile-history log-edit-comment-ring))
   :config
   (savehist-mode +1))
 
@@ -418,19 +422,19 @@
 
 
 (use-package corfu-candidate-overlay
-    :straight (:type git
-               :repo "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
-               :files (:defaults "*.el"))
-    :after corfu
-    :config
-    ;; enable corfu-candidate-overlay mode globally
-    ;; this relies on having corfu-auto set to nil
-    (corfu-candidate-overlay-mode +1)
-    ;; bind Ctrl + TAB to trigger the completion popup of corfu
-    (global-set-key (kbd "C-<tab>") 'completion-at-point)
-    ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
-    ;; (keybing <iso-lefttab> may not work for your keyboard model)
-    (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
+  :straight (:type git
+                   :repo "https://code.bsdgeek.org/adam/corfu-candidate-overlay"
+                   :files (:defaults "*.el"))
+  :after corfu
+  :config
+  ;; enable corfu-candidate-overlay mode globally
+  ;; this relies on having corfu-auto set to nil
+  (corfu-candidate-overlay-mode +1)
+  ;; bind Ctrl + TAB to trigger the completion popup of corfu
+  (global-set-key (kbd "C-<tab>") 'completion-at-point)
+  ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+  ;; (keybing <iso-lefttab> may not work for your keyboard model)
+  (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
 
 
 (use-package nerd-icons
@@ -481,20 +485,16 @@
 
 ;; (face-attribute 'default :font)
 
-(when (member "DejaVu Sans Mono" (font-family-list))
-  (set-frame-font "DejaVu Sans Mono-22" t t))
-
-
 (setq display-time-world-list t)
 
 (setq legacy-style-world-list '(("UTC" "UTC")
- ("PST8PDT" "Seattle")
- ("EET-2EEST" "Bucharest")
- ("EST5EDT" "New York")
- ("GMT0BST" "London")
- ("CET-1CDT" "Paris")
- ("IST-5:30" "Bangalore")
- ("JST-9" "Tokyo")))
+                                ("PST8PDT" "Seattle")
+                                ("EET-2EEST" "Bucharest")
+                                ("EST5EDT" "New York")
+                                ("GMT0BST" "London")
+                                ("CET-1CDT" "Paris")
+                                ("IST-5:30" "Bangalore")
+                                ("JST-9" "Tokyo")))
 
 
 (use-package org-modern :straight t)
@@ -788,3 +788,52 @@
   (projectile-switch-project-action 'neotree-projectile-action))
 
 (use-package all-the-icons :straight t)
+
+
+
+
+;; https://www.reddit.com/r/emacs/comments/16rny96/help_setting_up_eglot_clangd_for_c_development/
+;; https://github.com/MaskRay/ccls/wiki/Project-Setup
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '((c-mode c-ts-mode c++-mode c++-ts-mode) . ("ccls" "--init" "{\"compilationDatabaseDirectory\": \"build\"}"))))
+
+(add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'c-ts-mode-hook 'eglot-ensure)
+(add-hook 'c++-mode-hook 'eglot-ensure)
+(add-hook 'c++-ts-mode-hook 'eglot-ensure)
+
+
+(require 'cl-extra)
+(setq project-sentinels '("meson.build" "bb.edn" "deps.edn" "package.json" ".monorepo-project"))
+
+(defun find-enclosing-project (dir)
+  (locate-dominating-file
+   dir
+   (lambda (file)
+     (and (file-directory-p file)
+          (cl-some (lambda (sentinel)
+                     (file-exists-p (expand-file-name sentinel file)))
+                   project-sentinels)))))
+
+(add-hook 'project-find-functions
+          #'(lambda (d)
+              (let ((dir (find-enclosing-project d)))
+                (if dir (list 'vc 'Git  dir) nil)
+                )))
+
+(use-package apheleia :straight t)
+(apheleia-global-mode +1)
+
+(use-package editorconfig :straight t)
+
+(use-package meson-mode :straight t)
+(use-package olivetti :straight t)
+(use-package focus :straight t)
+
+(use-package copilot
+  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("dist" "*.el"))
+  :ensure t)
+(define-key copilot-completion-map (kbd "<right>") 'copilot-accept-completion)
+(define-key copilot-completion-map (kbd "<right>") 'copilot-accept-completion)
+(add-hook 'prog-mode-hook 'copilot-mode)
