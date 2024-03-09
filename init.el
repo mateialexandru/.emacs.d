@@ -113,6 +113,7 @@
            (doom-modeline-height 40 )
 	   )
   )
+(display-battery-mode t)
 
 ;; Before: (load-theme 'deeper-blue)
 ;; (use-package leuven-theme
@@ -145,7 +146,7 @@
 
 ;; Machine specific configuration
 (when (string= "Framework" (system-name))
-  (load-theme 'junio
+  (load-theme 'junio                    ;; 'doom-ayu-mirage
               ))
 ;; 'ample-theme 
 ;; 'doom-monokai-pro
@@ -788,3 +789,4 @@
   (projectile-switch-project-action 'neotree-projectile-action))
 
 (use-package all-the-icons :straight t)
+(use-package pocket-reader :straight t )
