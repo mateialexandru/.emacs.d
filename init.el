@@ -60,7 +60,7 @@
 
 (use-package delight :straight t)
 (use-package emacs
-  :delight (volatile-highlights-mode) (eldoc-mode) (which-key-mode) (projectile-mode)
+  :delight (volatile-highlights-mode) (eldoc-mode) (which-key-mode) (projectile-mode) (hs-minor-mode)
   :init
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 2)
@@ -475,23 +475,12 @@
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
   )
 
-
-
-
-;; (pixel-scroll-precision-mode 1)
-
-
-;; (when (member "Segoe UI Emoji" (font-family-list))
-;;   (set-fontset-font
-;;    t 'symbol (font-spec :family "Segoe UI Emoji") nil 'prepend))
-
-;; (defun fix/copy-selected-text (start end)
-;;   (interactive "r")
-;;   (if (use-region-p)
-;;       (let ((text (buffer-substring-no-properties start end)))
-;;         (shell-command (concat "echo '" text "' | clip.exe")))))
-
-(use-package magit :straight t)
+(use-package magit :straight t
+  :custom
+  (magit-display-buffer-function
+   #'magit-display-buffer-fullframe-status-v1)
+  (magit-bury-buffer-function
+   #'magit-restore-window-configuration))
 
 ;; https://ianyepan.github.io/posts/emacs-emojis/
 (use-package emojify
@@ -837,6 +826,60 @@
 (add-hook 'c++-mode-hook 'eglot-ensure)
 (add-hook 'c++-ts-mode-hook 'eglot-ensure)
 
+(use-package eglot-booster
+  :straight (:type git
+                   :repo "https://github.com/jdtsmith/eglot-booster"
+                   :files (:defaults "*.el"))
+  :after eglot
+  :config	(eglot-booster-mode))
+
+;; bind C-c compile
+(global-set-key (kbd "C-c c") 'compile)
+
+;; https://stackoverflow.com/questions/11043004/emacs-compile-buffer-auto-close
+(require 'compile)
+(defcustom auto-hide-compile-buffer-delay 0
+  "Time in seconds before auto hiding compile buffer."
+  :group 'compilation
+  :type 'number
+  )
+
+(add-hook 'compilation-start-hook 'compilation-started)
+(add-hook 'compilation-finish-functions 'hide-compile-buffer-if-successful)
+(make-variable-buffer-local 'compilation-start-time)
+(defun compilation-started (proc)
+  (setq compilation-start-time (current-time)))
+
+(defun hide-compile-buffer-if-successful (buffer string)
+  (setq compilation-total-time (time-subtract nil compilation-start-time))
+  (setq time-str (concat " (Time: " (format-time-string "%s.%3N" compilation-total-time) "s)"))
+
+  (if
+      (with-current-buffer buffer
+        (setq warnings (eval compilation-num-warnings-found))
+        (setq warnings-str (concat " (Warnings: " (number-to-string warnings) ")"))
+        (setq errors (eval compilation-num-errors-found))
+
+        (if (eq errors 0) nil t)
+        )
+
+      ;;If Errors then
+      (message (concat "Compiled with Errors" warnings-str time-str))
+
+    ;;If Compiled Successfully or with Warnings then
+    (progn
+      (bury-buffer buffer)
+      (run-with-timer auto-hide-compile-buffer-delay nil 'delete-window (get-buffer-window buffer 'visible))
+      (message (concat "Compiled Successfully" warnings-str time-str))
+      )
+    )
+  )
+
+(use-package xterm-color :straight t)
+(setq compilation-environment '("TERM=xterm-256color"))
+(defun my/advice-compilation-filter (f proc string)
+  (funcall f proc (xterm-color-filter string)))
+(advice-add 'compilation-filter :around #'my/advice-compilation-filter)
 
 (require 'cl-extra)
 (setq project-sentinels '("meson.build" "bb.edn" "deps.edn" "package.json" ".monorepo-project"))
@@ -889,6 +932,37 @@
 
 (use-package nix-mode :straight t
   :mode "\\.nix\\'")
+
+(use-package shell-command+ :ensure t
+  :bind
+  ("M-!" . shell-command+)
+  )
+
+(use-package elfeed :straight t
+  :bind
+  ("C-x w" . elfeed)
+  :custom
+  (elfeed-feeds
+   '(("https://macadie.info/feed/" emacs)
+     ("https://www.reddit.com/r/emacs.rss" emacs reddit)
+     ("https://sachachua.com/blog/feed/" emacs sacha)
+     ("http://www.aaronsw.com/2002/feeds/pgessays.rss" opinions pg)
+     ("https://world.hey.com/dhh/feed.atom" opinions dhh))
+   )
+  )
+
+(use-package hs-minor-mode
+  :diminish t
+  :hook
+  (prog-mode . hs-minor-mode)
+  :bind
+  (:map hs-minor-mode-map
+        ("M-[" . hs-toggle-hiding)
+        )
+  
+  )
+
+(use-package mpv :straight t)
 
 (provide 'init)
 ;;; init.el ends here
