@@ -196,10 +196,6 @@
 
 (set-register ?i '(file . "~/.emacs.d/init.el"))
 
-(use-package ace-window
-  :straight t
-  :bind
-  (("M-\\" . ace-window)))
 
 (use-package move-text
   :straight t
@@ -293,6 +289,9 @@
   (embark-collect-mode . consult-preview-at-point-mode))
 
 
+(setq read-buffer-completion-ignore-case t
+      read-file-name-completion-ignore-case t
+      completion-ignore-case t)
 
 ;; Example configuration for Consult
 (use-package consult
@@ -305,7 +304,7 @@
          ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
          ("C-x 5 b" . consult-buffer-other-frame) ;; orig. switch-to-buffer-other-frame
          ("C-x t b" . consult-buffer-other-tab)	;; orig. switch-to-buffer-other-tab
-         ("C-x r b" . consult-bookmark)		;; orig. bookmark-jump
+         ("C-x r b" . consult-bookmark)         ;; orig. bookmark-jump
          ("C-x p b" . consult-project-buffer) ;; orig. project-switch-to-buffer
          ;; Other custom bindings
          ("M-y" . consult-yank-pop) ;; orig. yank-pop
@@ -626,8 +625,27 @@
 (use-package avy
   :straight t
   :defer t
-  :bind (("C-`" . avy-goto-char)))
+  :custom
+  ;; Jump to any open window or frame
+  (avy-all-windows 'all-frames)
 
+  :bind
+  (("C-`" . avy-goto-char)
+   ("M-`" . avy-goto-word-1))
+  )
+
+(use-package ace-link
+  :straight t
+  :config
+  (ace-link-setup-default)
+  )
+
+(define-key org-mode-map (kbd "M-o") 'ace-link-org)
+
+(use-package ace-window
+  :straight t
+  :bind
+  (("M-\\" . ace-window)))
 
 ;; wrap-region
 ;; https://pragmaticemacs.wordpress.com/2015/10/12/wrap-text-in-custom-characters/
@@ -922,13 +940,13 @@
   :hook (prog-mode . copilot-mode))
 
 
-(use-package flycheck :straight t
-  :config
-  (global-flycheck-mode))
+;; (use-package flycheck :straight t
+;;   :config
+;;   (global-flycheck-mode))
 
-(use-package flycheck-posframe :straight t
-  :config
-  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+;; (use-package flycheck-posframe :straight t
+;;   :config
+;;   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
 
 (use-package nix-mode :straight t
   :mode "\\.nix\\'")
