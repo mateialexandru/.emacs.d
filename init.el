@@ -517,7 +517,7 @@
   :custom
   (org-log-into-drawer t)
   (org-hide-emphasis-markers t))
-
+(require 'org-tempo)
 ;; (setq
 ;;  ;; Edit settings
 ;;  org-auto-align-tags nil
@@ -583,6 +583,9 @@
 ;; https://pragmaticemacs.wordpress.com/2016/08/24/a-tweak-to-elfeed-filtering/
 (use-package elfeed :straight t)
 
+(require 'dired-x)
+
+(setq dired-listing-switches "-alh")
 
 ;; https://pragmaticemacs.wordpress.com/
 (use-package dired-subtree
@@ -630,7 +633,7 @@
   (avy-all-windows 'all-frames)
 
   :bind
-  (("C-`" . avy-goto-char)
+  (("C-`" . avy-goto-char-timer)
    ("M-`" . avy-goto-word-1))
   )
 
@@ -728,6 +731,32 @@
 ;;          ("<tab>" . sqlite-mode-extras-tab-dwim)
 ;;          ("RET" . sqlite-mode-extras-ret-dwim)))
 
+(use-package consult-org-roam
+  :straight t
+  :after org-roam
+  :init
+  (require 'consult-org-roam)
+  ;; Activate the minor mode
+  (consult-org-roam-mode 1)
+  :custom
+  ;; Use `ripgrep' for searching with `consult-org-roam-search'
+  (consult-org-roam-grep-func #'consult-ripgrep)
+  ;; Configure a custom narrow key for `consult-buffer'
+  (consult-org-roam-buffer-narrow-key ?n)
+  ;; Display org-roam buffers right after non-org-roam buffers
+  ;; in consult-buffer (and not down at the bottom)
+  (consult-org-roam-buffer-after-buffers t)
+  (consult-org-roam-buffer-enabled nil)
+  :config
+  ;; Eventually suppress previewing for certain functions
+  (consult-customize
+   consult-org-roam-forward-links
+   :preview-key "M-.")
+  :bind
+  ;; Define some convenient keybindings as an addition
+  ("C-c n e" . consult-org-roam-file-find)
+  ("C-c n b" . consult-org-roam-backlinks)
+  ("C-c n r" . consult-org-roam-search))
 
 (use-package org-roam
   :straight t
@@ -759,6 +788,7 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((plantuml . t)
+   (shell . t)
    (restclient . t)))
 
 (setq org-plantuml-jar-path "~/.emacs.d/tools/plantuml-1.2024.3.jar")
@@ -813,6 +843,16 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
+(setq my-bicep-tsauto-config
+      (make-treesit-auto-recipe
+       :lang 'bicep
+       :ts-mode 'bicep-ts-mode
+       :url "https://github.com/amaanq/tree-sitter-bicep"
+       :revision "master"
+       :source-dir "src"
+       :ext "\\.bicep\\'"))
+
+(add-to-list 'treesit-auto-recipe-list my-bicep-tsauto-config)
 
 (use-package docker
   :straight t
@@ -981,6 +1021,50 @@
   )
 
 (use-package mpv :straight t)
+
+(defun x/play-youtube ()
+  (interactive)
+  (let ((url (read-string "Enter the youtube URL: ")))
+    (async-shell-command (concat "mpv " url))
+    )
+  )
+
+(global-set-key (kbd "C-x y") 'x/play-youtube)
+(async-shell-command "mpv https://www.youtube.com/watch?v=DYADMhXzSTM")
+
+(use-package bicep-ts-mode :straight t
+  :mode "\\.bicep\\'")
+
+;; utf-8 ;; 
+(setq locale-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+(use-package org-board :straight t
+  :bind (:map org-mode-map
+              ("C-c o" . org-board-keymap)) 
+  )
+
+
+(defun kill-other-buffers-except-scratch-and-current ()
+  "Kill all other buffers except scratch and the current buffer."
+  (interactive)
+  (mapc 'kill-buffer (delq (current-buffer) (delq (get-buffer "*scratch*") (buffer-list)))))
+(global-set-key (kbd "C-x K") 'kill-other-buffers-except-scratch-and-current)
+
+(use-package whole-line-or-region
+  :straight t
+  :diminish whole-line-or-region-global-mode
+  :config (whole-line-or-region-global-mode t))
+
+(use-package keyfreq
+  :straight t
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
 
 (provide 'init)
 ;;; init.el ends here
