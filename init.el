@@ -1003,9 +1003,10 @@
   (elfeed-feeds
    '(("https://macadie.info/feed/" emacs)
      ("https://www.reddit.com/r/emacs.rss" emacs reddit)
-     ("https://sachachua.com/blog/feed/" emacs sacha)
+     ("https://sachachua.com/blog/feed/index.xml" emacs sacha)
      ("http://www.aaronsw.com/2002/feeds/pgessays.rss" opinions pg)
-     ("https://world.hey.com/dhh/feed.atom" opinions dhh))
+     ("https://world.hey.com/dhh/feed.atom" opinions dhh)
+     ("https://robbmann.io/index.xml" opinions robb))
    )
   )
 
