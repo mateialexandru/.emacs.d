@@ -245,7 +245,7 @@ The default value is \"es -r\", which only works if you place the command line v
 (use-package avy
   :ensure t
   :custom
-  (avy-timeout-seconds 0.3)
+  (avy-timeout-seconds 0.25)            ;
   (avy-all-windows 'all-frames)
   :init
   (avy-setup-default)
