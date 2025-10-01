@@ -1,0 +1,26 @@
+# Emacs generated state files
+org-roam.db
+custom.el
+projects.eld
+recentf.eld
+/transient/
+/straight/
+/server/
+/savehist
+/auto-save-list/
+/eln-cache/
+/elpa/
+/network-security.data
+/url/
+/projectile-bookmarks.eld
+/projects
+/recentf
+/skewer-cache/
+/tree-sitter/
+/.cache/
+/backups/
+/chatgpt/
+/eshell/
+/history
+/var/
+/bookmarks
