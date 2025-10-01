@@ -6,9 +6,6 @@
             (setq gc-cons-threshold 100000000
                   gc-cons-percentage 0.1)))
 
-(setq package-enable-at-startup nil
-      package-quickstart t)  ;; byte-compile autoloads cache
-
 ;; UI off before frames appear
 (tool-bar-mode -1)
 (menu-bar-mode -1)

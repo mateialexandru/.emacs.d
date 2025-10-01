@@ -19,7 +19,6 @@
   (package-install 'use-package))
 (require 'use-package)
 
-
 (use-package emacs
   :preface
   (defun alex/save-some-buffers-diff (buffer)
@@ -58,7 +57,6 @@
   (pending-delete-mode 1)
   (winner-mode 1)
   (recentf-mode 1)
-  (global-hl-line-mode 1)
   (show-paren-mode 1)
   (global-goto-address-mode 1)
 
@@ -100,16 +98,6 @@
   ;; Font application for GUI frames (daemon or later frames)
   (after-init . alex/apply-gui-fonts)
   (after-make-frame-functions . alex/apply-gui-fonts)
-  )
-
-
-
-(use-package autorevert
-  :commands (global-auto-revert-mode auto-revert-mode)
-  :hook
-  (after-init . global-auto-revert-mode)   ;; don’t load now; will autoload the command
-  :custom
-  (global-auto-revert-non-file-buffers t)             ;; include Dired, *shell*, etc.
   )
 
 ;; Vertico: vertical completion UI
@@ -217,6 +205,20 @@ The default value is \"es -r\", which only works if you place the command line v
 ;; Embark: context-aware actions
 (use-package embark
   :ensure t
+  :config
+  ;; Define a custom embark action
+  (defun my/embark-qrencode (s)
+    "Generate QR code from string or region S."
+    (interactive "sQR string: ")
+    (if (use-region-p)
+        (qrencode-region (region-beginning) (region-end))
+      (qrencode-string s)))
+
+
+  (define-key embark-region-map (kbd "q") #'my/embark-qrencode)
+  (define-key embark-url-map (kbd "q")    #'my/embark-qrencode)
+  (define-key embark-general-map (kbd "q") #'my/embark-qrencode)
+  
   :bind
   (("C-." . embark-act)))  ;; Acts like a right-click menu
 
@@ -239,16 +241,18 @@ The default value is \"es -r\", which only works if you place the command line v
   :bind
   (("C-=" . er/expand-region)))
 
+;; https://pragmaticemacs.wordpress.com/2016/04/08/super-efficient-movement-using-avy/
 (use-package avy
   :ensure t
   :custom
   (avy-timeout-seconds 0.3)
+  (avy-all-windows 'all-frames)
   :init
   (avy-setup-default)
   :bind
   (("C-;" . avy-goto-char-timer)))
 
-(use-package completion-preview
+(use-package completion-preview 
   :ensure t
   :hook ((prog-mode text-mode) . completion-preview-mode)
   :config
@@ -303,6 +307,12 @@ The default value is \"es -r\", which only works if you place the command line v
   (setq trashed-sort-key '("Date deleted" . t))
   (setq trashed-date-format "%Y-%m-%d %H:%M:%S"))
 
+(use-package no-littering
+  :ensure t
+  :init
+  (setq no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory)
+        no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
+
 (use-package modus-themes
   :ensure t
   :config
@@ -330,7 +340,7 @@ The default value is \"es -r\", which only works if you place the command line v
   (interactive) 
   (async-shell-command (completing-read "Command history: " shell-command-history)))
 
-(use-package ligature
+(use-package ligature 
   :ensure t
   :config
   ;; Enable the "www" ligature in every possible major mode
@@ -445,11 +455,10 @@ C-u C-u: reset stored command."
         '("clang-format" "-assume-filename" filepath))
   (add-to-list 'apheleia-mode-alist '(c-mode . clang-format))
   (add-to-list 'apheleia-mode-alist '(c++-mode . clang-format))
-  (apheleia-global-mode t)
-
+  
   ;; Prevent double-compile: flip a flag in the *official* post-format hook.
   (add-hook 'apheleia-post-format-hook
-            (lambda (_)
+            (lambda ()
               (setq-local my-skip-next-compile t))))
 
 (use-package treemacs :ensure t :commands (treemacs))
@@ -500,9 +509,10 @@ C-u C-u: reset stored command."
 	      (setq-local q/world-clock-header-active t))))
   )
 
+
 (use-package projectile
   :ensure t
-  :bind
+  :bind-keymap
   ("C-x p" . projectile-command-map)
   :custom
   (projectile-indexing-method 'alien)
@@ -511,51 +521,6 @@ C-u C-u: reset stored command."
   (setq tags-revert-without-query t)
   (projectile-mode +1))
 
-
-(use-package lispy :ensure t
-  :hook
-  ((emacs-lisp-mode . lispy-mode)
-   (lisp-mode . lispy-mode)
-   (scheme-mode . lispy-mode)
-   (clojure-mode . lispy-mode)
-   (hy-mode . lispy-mode)
-   (racket-mode . lispy-mode)
-   (lfe-mode . lispy-mode)
-   (dune-mode . lispy-mode)
-   (fennel-mode . lispy-mode)
-   (sly-mrepl-mode . lispy-mode)
-   (sly-mode . lispy-mode)
-   (eval-expression-minibuffer-setup . lispy-mode)
-   (ielm-mode . lispy-mode)))
-
-
-                                        ;(global-set-key [remap dabbrev-expand] 'hippie-expand)
-
-
-;; Before: (load-theme 'deeper-blue)
-;; (use-package leuven-theme
-;;   :straight t
-;;   :config
-;;   (load-theme 'leuven-dark t))
-                                        ;(use-package ample-theme :straight t)
-                                        ;(use-package sublime-themes :straight t)
-
-;; Machine specific configuration
-                                        ;(when (string= "Framework" (system-name))
-                                        ;  (load-theme 'junio                    ;; 'doom-ayu-mirage
-                                        ;              ))
-;; 'ample-theme
-;; 'doom-monokai-pro
-;; 'doom-ayu-mirage
-;; 'doom-Iosvkem
-;; 'doom-gruvbox
-;; 'doom-ay-dark
-;; 'doom-bluloco-darkp
-
-                                        ;(when (string= "Framework" (system-name))
-                                        ;  (when (member "DejaVu Sans Mono" (font-family-list))
-                                        ;    (set-frame-font "DejaVu Sans Mono-22" t t))
-                                        ;  )
 
 (use-package move-text
   :ensure t
@@ -586,11 +551,6 @@ C-u C-u: reset stored command."
    '(shell-command-history kill-ring search-ring regexp-search-ring
                            compile-history log-edit-comment-ring)))
 
-
-                                        ;(setq read-buffer-completion-ignore-case t
-                                        ;      read-file-name-completion-ignore-case t
-                                        ;      completion-ignore-case t)
-
 (use-package org-modern
   :config
   (global-org-modern-mode)
@@ -601,45 +561,35 @@ C-u C-u: reset stored command."
   (org-log-into-drawer t)
   (org-hide-emphasis-markers t))
 (require 'org-tempo)
-;; (setq
-;;  ;; Edit settings
-;;  org-auto-align-tags nil
-;;  org-tags-column 0
-;;  org-catch-invisible-edits 'show-and-error
-;;  org-special-ctrl-a/e t
-;;  org-insert-heading-respect-content t
-
-;;  ;; Org styling, hide markup etc.
-;;  org-hide-emphasis-markers t
-;;  org-pretty-entities t
-;;  org-ellipsis "…"
-
-;;  ;; Agenda styling
-;;  org-agenda-tags-column 0
-;;  org-agenda-block-separator ?─
-;;  org-agenda-time-grid
-;;  '((daily today require-timed)
-;;    (800 1000 1200 1400 1600 1800 2000)
-;;    " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-;;  org-agenda-current-time-string
-;;  "◀── now ─────────────────────────────────────────────────")
-
-
 (use-package restclient :ensure t)
 (use-package restclient-jq :ensure t)
 (use-package ob-restclient :ensure t)
 (use-package counsel-jq :ensure t)
 (add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode) t)
 
-(use-package org-cliplink :ensure t)
-(global-set-key (kbd "C-M-y") 'org-cliplink)
+(use-package org-cliplink
+  :ensure t
+  :bind
+  (:map org-mode-map
+        ("C-y" . my/org-yank-or-cliplink))
+  :preface
+  (defun my/org-yank-or-cliplink ()
+    "If clipboard looks like a URL, use `org-cliplink'.
+Otherwise fall back to `yank`."
+    (interactive)
+    (let ((clip (current-kill 0 t)))
+      (if (and clip (string-match-p "^https?://" clip))
+          (call-interactively #'org-cliplink)
+        (call-interactively #'yank)))))
+
+
 
 ;; https://jblevins.org/log/rainbow-mode
 (use-package rainbow-mode :ensure t)
-(use-package rainbow-delimiters :ensure t)
 
 ;;https://github.com/ruediger/qrencode-el
-(use-package qrencode :ensure t)
+(use-package qrencode :ensure t
+  :commands (qrencode-region qrencode-string))
 
 ;; narrow dired to match filter
 ;; https://pragmaticemacs.wordpress.com/2016/03/01/dynamically-filter-directory-listing-with-dired-narrow/
@@ -650,33 +600,7 @@ C-u C-u: reset stored command."
               ("/" . dired-narrow)))
 
 
-;; persistent-scratch
-;; https://pragmaticemacs.wordpress.com/2016/11/10/a-persistent-scratch-buffer/
-                                        ;(use-package persistent-scratch
-                                        ;  :straight t
-                                        ;  :config
-                                        ;  (persistent-scratch-setup-default))
-
-;; volatile highlights - temporarily highlight changes from pasting etc
-;; https://pragmaticemacs.wordpress.com/2016/05/05/volatile-highlights/
-;; https://github.com/k-talo/volatile-highlights.el
-(use-package volatile-highlights
-  :ensure t
-  :config
-  (volatile-highlights-mode t))
-
-;; https://pragmaticemacs.wordpress.com/2016/04/08/super-efficient-movement-using-avy/
-                                        ;(use-package avy
-                                        ;  :straight t
-                                        ;  :defer t
-                                        ;  :custom
-                                        ;  ;; Jump to any open window or frame
-                                        ;  (avy-all-windows 'all-frames)
-                                        ;
-                                        ;  :bind
-                                        ;  (("C-`" . avy-goto-char-timer)
-                                        ;   ("M-`" . avy-goto-word-1))
-                                        ;  )
+     
 
 (use-package ace-link
   :ensure t
@@ -820,7 +744,7 @@ C-u C-u: reset stored command."
 
 
 ;; uses json-snatcher underneath C-c C-p
-(load (expand-file-name "x.el" user-emacs-directory))
+;; (load (expand-file-name "x.el" user-emacs-directory))
 
 (use-package json-mode :ensure t
   :bind
@@ -853,39 +777,66 @@ C-u C-u: reset stored command."
    )
   )
 
-(use-package hideshow
+(use-package hideshow 
   :hook
   (prog-mode . hs-minor-mode)
   :bind
   (:map hs-minor-mode-map
         ("M-[" . hs-toggle-hiding)
-        )
-  
-  )
+        ))
 
-;; Frontend
+;; Frontend: Corfu
 (use-package corfu
   :ensure t
-  :init (global-corfu-mode)
-  :custom
-  (corfu-auto t) (corfu-auto-delay 0.05) (corfu-auto-prefix 2)
-  (corfu-quit-no-match 'separator) (corfu-cycle t))
-
-;; Extra completion sources (dabbrev, files, keywords, etc.)
-(use-package cape
   :init
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-keyword))
+  (global-corfu-mode)
+  :custom
+  (corfu-popupinfo-mode 1)
+  (corfu-auto nil)
+  (corfu-auto-delay 0.05)
+  (corfu-auto-prefix 2)
+  (corfu-quit-no-match 'separator)
+  (corfu-cycle t))
 
-(use-package no-littering
+(use-package kind-icon
+  :ensure t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  (kind-icon-use-icons t)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+(use-package prescient
+  :ensure t
+  :init (prescient-persist-mode 1))  ;; remember your sorting preferences
+
+(use-package corfu-prescient
+  :ensure t
+  :after (corfu prescient)
+  :init (corfu-prescient-mode 1))
+
+;; Extra completion sources: Cape
+(use-package cape
   :ensure t
   :init
-  (setq no-littering-etc-directory (expand-file-name "etc/" user-emacs-directory)
-        no-littering-var-directory (expand-file-name "var/" user-emacs-directory)))
+  (defun alex/capf-defaults ()
+    ;; Keep existing ones, add useful cape ones
+    (add-hook 'completion-at-point-functions #'cape-dabbrev -10 t)
+    (add-hook 'completion-at-point-functions #'cape-keyword -20 t)
+    (add-hook 'completion-at-point-functions #'cape-file -30 t)
+    ;(add-hook 'completion-at-point-functions #'cape-elisp-symbol -40 t)
+    )
 
+  (add-hook 'text-mode-hook #'alex/capf-defaults)
+  (add-hook 'prog-mode-hook #'alex/capf-defaults)
 
-(use-package mpv :ensure t)
+  (defun alex/capf-eshell ()
+    ;; eshell specific: keep pcomplete, add file, history
+    (add-hook 'completion-at-point-functions #'pcomplete-completions-at-point nil t)
+    (add-hook 'completion-at-point-functions #'cape-file nil t)
+    (add-hook 'completion-at-point-functions #'cape-history nil t))
+  (add-hook 'eshell-mode-hook #'alex/capf-eshell))
 
 
 (defun kill-other-buffers-except-scratch-and-current ()
@@ -906,12 +857,18 @@ C-u C-u: reset stored command."
 
 (use-package diff-hl
   :ensure t
-  :hook ((prog-mode . diff-hl-mode) (dired-mode . diff-hl-dired-mode))
+  :commands (diff-hl-mode diff-hl-dired-mode)
   :config (diff-hl-flydiff-mode 1))
 
 (use-package which-key
   :hook (after-init . which-key-mode)
-  :custom (which-key-idle-delay 0.4))
+  :custom (which-key-idle-delay 0.4)
+  )
+
+(use-package minions
+  :ensure t
+  :hook (after-init . minions-mode)
+  :custom (minions-mode-line-lighter "…"))
 
 (provide 'init)
 ;;; init.el ends here
