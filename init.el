@@ -126,7 +126,7 @@ DIR and GIVEN-INITIAL match the method signature of `consult-wrapper'."
     (let ((initial
            (or given-initial
                (when (use-region-p)
-		             (buffer-substring-no-properties (region-beginning) (region-end))))))
+		 (buffer-substring-no-properties (region-beginning) (region-end))))))
       (consult-ripgrep dir initial)))
   (defun wrapper/consult-line-symbol-at-point ()
     (interactive)
@@ -142,7 +142,7 @@ The default value is \"es -r\", which only works if you place the command line v
     "Build command line from INPUT."
     (pcase-let ((`(,arg . ,opts) (consult--command-split input)))
       (unless (string-blank-p arg)
-	      (cons (append (consult--build-args consult-everything-args)
+	(cons (append (consult--build-args consult-everything-args)
                       (consult--split-escaped arg) opts)
               (cdr (consult--default-regexp-compiler input 'basic t))))))
 
@@ -471,9 +471,9 @@ C-u C-u: reset stored command."
   :ensure nil ;; built-in
   :custom
   (world-clock-list '(("UTC" "UTC")
-		                  ("PST8PDT" "Seattle")
-		                  ("EET-2EEST" "Bucharest")
-		                  ("EST5EDT" "New York")))
+		      ("PST8PDT" "Seattle")
+		      ("EET-2EEST" "Bucharest")
+		      ("EST5EDT" "New York")))
   :config
   ;; (setq display-time-world-list world-clock-list)
   (setq legacy-style-world-list world-clock-list)
@@ -486,27 +486,27 @@ C-u C-u: reset stored command."
     "Toggle display of world clock in the header line."
     (interactive)
     (if q/world-clock-header-active
-	      (progn
+	(progn
           (setq-local header-line-format nil)
           (setq-local q/world-clock-header-active nil))
       (let ((time-string
              (mapconcat
               (lambda (zone)
-		            (let ((time (format-time-string "%H:%M" (current-time) (car zone))))
+		(let ((time (format-time-string "%H:%M" (current-time) (car zone))))
                   (format "%s: %s" (cadr zone) time)))
               world-clock-list
               " | ")))
-	      (setq-local header-line-format
+	(setq-local header-line-format
                     `(:eval
                       (let* ((str ,time-string)
                              (width (window-width))
                              (padding (/ (- width (length str)) 2))
                              (full-line (concat
-					                               (make-string (max 0 padding) ?\s)
-					                               str
-					                               (make-string (max 0 (- width (length str) padding)) ?\s))))
-			                  (propertize full-line 'face 'header-line))))
-	      (setq-local q/world-clock-header-active t))))
+					 (make-string (max 0 padding) ?\s)
+					 str
+					 (make-string (max 0 (- width (length str) padding)) ?\s))))
+			(propertize full-line 'face 'header-line))))
+	(setq-local q/world-clock-header-active t))))
   )
 
 
@@ -532,7 +532,7 @@ C-u C-u: reset stored command."
   "Indent the region after moving it up or down.  IGNORED is not used."
   (let ((deactivate deactivate-mark))
     (if (region-active-p)
-	      (indent-region (region-beginning) (region-end))
+	(indent-region (region-beginning) (region-end))
       (indent-region (line-beginning-position) (line-end-position)))
     (setq deactivate-mark deactivate)))
 
@@ -598,9 +598,6 @@ Otherwise fall back to `yank`."
   :defer t
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
-
-
-     
 
 (use-package ace-link
   :ensure t
@@ -825,7 +822,7 @@ Otherwise fall back to `yank`."
     (add-hook 'completion-at-point-functions #'cape-dabbrev -10 t)
     (add-hook 'completion-at-point-functions #'cape-keyword -20 t)
     (add-hook 'completion-at-point-functions #'cape-file -30 t)
-    ;(add-hook 'completion-at-point-functions #'cape-elisp-symbol -40 t)
+					;(add-hook 'completion-at-point-functions #'cape-elisp-symbol -40 t)
     )
 
   (add-hook 'text-mode-hook #'alex/capf-defaults)
@@ -860,6 +857,8 @@ Otherwise fall back to `yank`."
   :commands (diff-hl-mode diff-hl-dired-mode)
   :config (diff-hl-flydiff-mode 1))
 
+(use-package magit :ensure t)
+
 (use-package which-key
   :hook (after-init . which-key-mode)
   :custom (which-key-idle-delay 0.4)
@@ -869,6 +868,26 @@ Otherwise fall back to `yank`."
   :ensure t
   :hook (after-init . minions-mode)
   :custom (minions-mode-line-lighter "…"))
+
+;; jsonviz-plantuml
+(use-package jsonviz-plantuml
+  :ensure nil                     ;; load from local file, not ELPA
+  :load-path "~/.emacs.d/site-lisp/"
+  :commands (jsonviz-plantuml-preview jsonviz-plantuml-export)
+  :custom
+  (jsonviz-plantuml-theme "!theme hacker")
+  (jsonviz-plantuml-pretty-print t)
+  (jsonviz-plantuml-output-type "png")     ;; or "svg"
+  (jsonviz-plantuml-open-method 'external) ;; or 'emacs
+  ;; Optional: set a fixed export folder; nil -> {$TMP}/jsonviz/
+  (jsonviz-plantuml-output-directory nil))
+
+(use-package shelldon :ensure t)
+(use-package shelldon-toggle-mode
+  :ensure nil
+  :load-path "~/.emacs.d/site-lisp/"
+  :commands (shelldon-toggle-mode toggle-shelldon-mode)
+  :bind (("C-c t" . toggle-shelldon-mode)))
 
 (provide 'init)
 ;;; init.el ends here
